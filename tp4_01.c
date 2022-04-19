@@ -10,8 +10,8 @@ struct Tarea {
 }typedef Tarea;
 
 void cargarTareas(Tarea * tareasPendientes, int cantTareas);
-void realizarTareas(Tarea * tareasPendientes, Tarea * tareasRealizadas, int cantTareas);
-void mostrarTareas(Tarea * tareasPendientes, Tarea * tareasRealizadas, int cantTareas);
+void realizarTareas(Tarea ** tareasPendientes, Tarea ** tareasRealizadas, int cantTareas);
+void mostrarTareas(Tarea ** tareasPendientes, Tarea ** tareasRealizadas, int cantTareas);
 
 
 int main(){
@@ -24,8 +24,8 @@ int main(){
     scanf("%d", &cantTareas);
     system("cls");
 
-    Tarea * tareasPendientes = (Tarea *) malloc(sizeof(Tarea)*cantTareas);
-    Tarea * tareasRealizadas = (Tarea *) malloc(sizeof(Tarea)*cantTareas);
+    Tarea ** tareasPendientes = (Tarea **) malloc(sizeof(Tarea*)*cantTareas);
+    Tarea ** tareasRealizadas;
 
     cargarTareas(tareasPendientes, cantTareas);
     realizarTareas(tareasPendientes, tareasRealizadas, cantTareas);
@@ -34,24 +34,25 @@ int main(){
     return 0;
 }
 
-void cargarTareas(Tarea * tareasPendientes, int cantTareas){
+void cargarTareas(Tarea ** tareasPendientes, int cantTareas){
     for (int i = 0; i < cantTareas; i++)
     {
-        char descripcion[100];
 
-        (tareasPendientes + i)->TareaID = i+1;
+        char descripcion[100];
+        *(tareasPendientes + i) = (Tarea *)malloc(sizeof(Tarea));
+        **(tareasPendientes + i)->TareaID = i+1;
 
         printf("Ingrese una descripcion para la tarea N %d\n", i+1);
         scanf("%s", &descripcion);
         system("cls");
-        (tareasPendientes + i)->Descripcion = (char*)malloc(sizeof(descripcion)*(strlen(descripcion)+1));
-        strcpy((tareasPendientes + i)->Descripcion,descripcion);
+        *(tareasPendientes + i)->Descripcion = (char*)malloc(sizeof(descripcion)*(strlen(descripcion)+1));
+        strcpy(*(tareasPendientes + i)->Descripcion,descripcion);
 
         (tareasPendientes + i)->Duracion = 10 + rand() % 100;
     }
 }
 
-void realizarTareas(Tarea * tareasPendientes,Tarea * tareasRealizadas, int cantTareas){
+void realizarTareas(Tarea ** tareasPendientes,Tarea ** tareasRealizadas, int cantTareas){
     int seRealizo;
 
     for (int i = 0; i < cantTareas; i++)
@@ -76,7 +77,7 @@ void realizarTareas(Tarea * tareasPendientes,Tarea * tareasRealizadas, int cantT
     }
 }
 
-void mostrarTareas(Tarea * tareasPendientes, Tarea * tareasRealizadas, int cantTareas){
+void mostrarTareas(Tarea ** tareasPendientes, Tarea ** tareasRealizadas, int cantTareas){
     printf("|||||||||||||||||TAREAS REALIZADAS|||||||||||||||||\n\n");
     for (int i = 0; i < cantTareas; i++)
     {
@@ -93,7 +94,7 @@ void mostrarTareas(Tarea * tareasPendientes, Tarea * tareasRealizadas, int cantT
 		    printf("Descripcion: \"%s\"\n", (tareasPendientes + i)->Descripcion);
 		    printf("Duracion: %d\n\n", (tareasPendientes + i)->Duracion);
         }
-    }  
+    }
 
     getchar();
     getchar();
