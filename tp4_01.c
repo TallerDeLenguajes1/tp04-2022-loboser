@@ -12,25 +12,30 @@ struct Tarea {
 void cargarTareas(Tarea ** tareasPendientes, int cantTareas);
 void realizarTareas(Tarea ** tareasPendientes, Tarea ** tareasRealizadas, int cantTareas);
 void mostrarTareas(Tarea ** tareasPendientes, Tarea ** tareasRealizadas, int cantTareas);
+Tarea BuscarTarea(Tarea ** tareasPendientes, Tarea ** tareasRealizadas, int cantTareas);
 
 
 int main(){
     srand(time(NULL));
 
     int cantTareas;
-    Tarea resultadoID;
+    Tarea buscar;
+    Tarea * tareasPendientes = NULL;
+    Tarea * tareasRealizadas = NULL;
 
     printf("Cantidad de tareas a cargar: ");
     scanf("%d", &cantTareas);
     system("cls");
 
-    Tarea * tareasPendientes = NULL;
-    Tarea * tareasRealizadas = NULL;
-
     cargarTareas(&tareasPendientes, cantTareas);
     realizarTareas(&tareasPendientes, &tareasRealizadas, cantTareas);
     mostrarTareas(&tareasPendientes, &tareasRealizadas, cantTareas);
+    buscar = BuscarTarea(&tareasPendientes, &tareasRealizadas, cantTareas);
 
+    printf("Tarea ID: %d \n", buscar.TareaID);
+    printf("Descripcion: \"%s\"\n", buscar.Descripcion);
+    printf("Duracion: %d\n\n", buscar.Duracion);
+    system("pause");
     return 0;
 }
 
@@ -97,4 +102,26 @@ void mostrarTareas(Tarea ** tareasPendientes, Tarea ** tareasRealizadas, int can
     }
     getchar();
     getchar();
+}
+
+Tarea BuscarTarea(Tarea ** tareasPendientes, Tarea ** tareasRealizadas, int cantTareas){
+    char palabraClave[100];
+    Tarea aux;
+    aux.TareaID = 0;
+
+    printf("Palabra clave para buscar\n\n");
+    gets(palabraClave);
+
+    for (int i = 0; i < cantTareas; i++)
+    {
+        if (strstr(tareasPendientes[i]->Descripcion, palabraClave))
+        {
+            return **(tareasPendientes + i);
+        }
+        else if (strstr(tareasRealizadas[i]->Descripcion, palabraClave))
+        {
+            return **(tareasRealizadas + i);
+        }
+    }
+    return aux;
 }
