@@ -7,23 +7,28 @@ struct Tarea {
     int TareaID; //Numerado en ciclo iterativo
     char *Descripcion; //
     int Duracion; // entre 10 – 100
-}typedef Tarea;
+}typedef TTarea;
 
-void cargarTareas(Tarea ** tareasPendientes, int cantTareas);
-void realizarTareas(Tarea ** tareasPendientes, Tarea ** tareasRealizadas, int cantTareas);
-void mostrarTareas(Tarea ** tareasPendientes, Tarea ** tareasRealizadas, int cantTareas);
-Tarea BusquedaPorID(Tarea ** tareasPendientes, Tarea ** tareasRealizadas, int cantTareas);
-Tarea BusquedaPorPalabra(Tarea ** tareasPendientes, Tarea ** tareasRealizadas, int cantTareas);
-void mostrarBusqueda(Tarea busqueda);
+struct Nodo{
+    TTarea T;
+    struct Nodo * Siguiente;
+}typedef TNodo;
+
+
+void cargarTareas(TNodo ** tareasPendientes, int cantTareas);
+void realizarTareas(TNodo ** tareasPendientes, TNodo ** tareasRealizadas, int cantTareas);
+void mostrarTareas(TNodo ** tareasPendientes, TNodo ** tareasRealizadas, int cantTareas);
+
 
 
 int main(){
     srand(time(NULL));
 
     int cantTareas;
-    Tarea busqueda;
-    Tarea * tareasPendientes = NULL;
-    Tarea * tareasRealizadas = NULL;
+    TTarea busqueda;
+
+    TNodo * tareasPendientes = NULL; //start
+    TNodo * tareasRealizadas = NULL; //start
 
     printf("Cantidad de tareas a cargar: ");
     scanf("%d", &cantTareas);
@@ -34,43 +39,48 @@ int main(){
     realizarTareas(&tareasPendientes, &tareasRealizadas, cantTareas);
     mostrarTareas(&tareasPendientes, &tareasRealizadas, cantTareas);
 
-    busqueda = BusquedaPorID(&tareasPendientes, &tareasRealizadas, cantTareas);
-    mostrarBusqueda(busqueda);
-
-    busqueda = BusquedaPorPalabra(&tareasPendientes, &tareasRealizadas, cantTareas);
-    mostrarBusqueda(busqueda);
 
     return 0;
 }
 
-void cargarTareas(Tarea ** tareasPendientes, int cantTareas){
+void cargarTareas(TNodo ** tareasPendientes, int cantTareas){
     for (int i = 0; i < cantTareas; i++)
     {
+        TNodo * nodoTarea = (TNodo *)malloc(sizeof(TNodo));
         char descripcion[100];
-        tareasPendientes[i] = (Tarea *)malloc(sizeof(Tarea));
-        tareasPendientes[i]->TareaID = i+1;
+        nodoTarea->T.TareaID = i+1;
 
         printf("Ingrese una descripcion para la tarea N %d\n", i+1);
         scanf("%s", &descripcion);
         fflush(stdin);
         system("cls");
-        
-        tareasPendientes[i]->Descripcion = (char*)malloc(sizeof(descripcion)*(strlen(descripcion)+1));
-        strcpy(tareasPendientes[i]->Descripcion, descripcion);
 
-        tareasPendientes[i]->Duracion = 10 + rand() % 100;
+        nodoTarea->T.Descripcion = (char*)malloc(sizeof(descripcion)*(strlen(descripcion)+1));
+        strcpy(nodoTarea->T.Descripcion, descripcion);
+
+        nodoTarea->T.Duracion = 10 + rand() % 100;
+        nodoTarea->Siguiente = NULL;
+
+        if (i != 0)
+        {
+            nodoTarea->Siguiente = *tareasPendientes;
+        }
+
+        *tareasPendientes = nodoTarea;
     }
 }
 
-void realizarTareas(Tarea ** tareasPendientes,Tarea ** tareasRealizadas, int cantTareas){
+void realizarTareas(TNodo ** tareasPendientes,TNodo ** tareasRealizadas, int cantTareas){
     int seRealizo;
+
+    TNodo * aux = *tareasPendientes;
+    TNodo * auxAnterior = NULL;
 
     for (int i = 0; i < cantTareas; i++)
     {
-        tareasRealizadas[i] = NULL;
-        printf("Tarea Numero %d\n\n", tareasPendientes[i]->TareaID);
-        printf("Descripcion: \"%s\"\n", tareasPendientes[i]->Descripcion);
-        printf("Duracion: %d\n\n", tareasPendientes[i]->Duracion);
+        printf("Tarea Numero %d\n\n", aux->T.TareaID);
+        printf("Descripcion: \"%s\"\n", aux->T.Descripcion);
+        printf("Duracion: %d\n\n", aux->T.Duracion);
 
         printf("Esta tarea se realizo?\nSI = 1       NO = 0\n\n");
         scanf("%d", &seRealizo);
@@ -79,87 +89,51 @@ void realizarTareas(Tarea ** tareasPendientes,Tarea ** tareasRealizadas, int can
 
         if (seRealizo == 1)
         {
-            tareasRealizadas[i] = tareasPendientes[i];
-            tareasPendientes[i] = NULL;
+            if (auxAnterior == NULL)
+            {
+                auxAnterior = aux->Siguiente;
+                aux->Siguiente = *tareasRealizadas;
+                *tareasRealizadas = aux;
+
+                *tareasPendientes = auxAnterior;
+                aux = *tareasPendientes;
+                
+                auxAnterior = NULL;
+            }
+            else
+            {
+                auxAnterior->Siguiente = aux->Siguiente;
+                aux->Siguiente = *tareasRealizadas;
+                *tareasRealizadas = aux;
+                aux = auxAnterior->Siguiente;
+            }    
+        }else{
+            auxAnterior = aux;
+            aux = aux->Siguiente;
         }
     }
 }
 
-void mostrarTareas(Tarea ** tareasPendientes, Tarea ** tareasRealizadas, int cantTareas){
+void mostrarTareas(TNodo ** tareasPendientes, TNodo ** tareasRealizadas, int cantTareas){
+    TNodo * auxPendientes = *tareasPendientes;
+    TNodo * auxRealizadas = *tareasRealizadas;
+
     printf("|||||||||||||||||TAREAS REALIZADAS|||||||||||||||||\n\n");
-    for (int i = 0; i < cantTareas; i++)
+    while (auxRealizadas)
     {
-        if (*(tareasRealizadas + i)!=NULL){
-            printf("Tarea ID: %d \n", tareasRealizadas[i]->TareaID);
-            printf("Descripcion: \"%s\"\n", tareasRealizadas[i]->Descripcion);
-            printf("Duracion: %d\n\n", tareasRealizadas[i]->Duracion);
-        }
+        printf("Tarea ID: %d \n", auxRealizadas->T.TareaID);
+        printf("Descripcion: \"%s\"\n", auxRealizadas->T.Descripcion);
+        printf("Duracion: %d\n\n", auxRealizadas->T.Duracion);
+        auxRealizadas = auxRealizadas->Siguiente;
     }
     printf("|||||||||||||||||TAREAS PENDIENTES|||||||||||||||||\n\n");
-    for (int i = 0; i < cantTareas; i++)
+    while (auxPendientes)
     {
-        if (*(tareasPendientes + i)!=NULL){
-            printf("Tarea ID: %d \n", tareasPendientes[i]->TareaID);
-		    printf("Descripcion: \"%s\"\n", tareasPendientes[i]->Descripcion);
-		    printf("Duracion: %d\n\n", tareasPendientes[i]->Duracion);
-        }
+        printf("Tarea ID: %d \n", auxPendientes->T.TareaID);
+		printf("Descripcion: \"%s\"\n", auxPendientes->T.Descripcion);
+		printf("Duracion: %d\n\n", auxPendientes->T.Duracion);
+        auxPendientes = auxPendientes->Siguiente;
     }
-    system("pause");
-    system("cls");
-}
-
-Tarea BusquedaPorID(Tarea ** tareasPendientes, Tarea ** tareasRealizadas, int cantTareas){
-    int ID;
-    Tarea aux;
-    aux.TareaID = 0;
-
-    printf("ID de la tarea a buscar: ");
-    scanf("%d",&ID);
-    fflush(stdin);
-    system("cls");
-
-    for (int i = 0; i < cantTareas; i++)
-    {
-        if (tareasPendientes[i]->TareaID == ID)
-        {
-            return **(tareasPendientes + i);
-        }
-        else if(tareasRealizadas[i]->TareaID == ID)
-        {
-            return **(tareasRealizadas + i);
-        }
-    }
-    return aux;
-}
-
-Tarea BusquedaPorPalabra(Tarea ** tareasPendientes, Tarea ** tareasRealizadas, int cantTareas){
-    char palabraClave[100];
-    Tarea aux;
-    aux.TareaID = 0;
-
-    printf("Palabra clave para buscar\n\n");
-    gets(palabraClave);
-    system("cls");
-
-    for (int i = 0; i < cantTareas; i++)
-    {
-        if (strstr(tareasPendientes[i]->Descripcion, palabraClave))
-        {
-            return **(tareasPendientes + i);
-        }
-        else if (strstr(tareasRealizadas[i]->Descripcion, palabraClave))
-        {
-            return **(tareasRealizadas + i);
-        }
-    }
-    return aux;
-}
-
-void mostrarBusqueda(Tarea busqueda){
-    printf("Tarea Numero %d\n\n", busqueda.TareaID);
-    printf("Descripcion: \"%s\"\n", busqueda.Descripcion);
-    printf("Duracion: %d\n\n", busqueda.Duracion);
-
     system("pause");
     system("cls");
 }
