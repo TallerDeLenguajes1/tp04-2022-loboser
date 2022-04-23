@@ -17,15 +17,16 @@ struct Nodo{
 
 void cargarTareas(TNodo ** tareasPendientes, int cantTareas);
 void realizarTareas(TNodo ** tareasPendientes, TNodo ** tareasRealizadas, int cantTareas);
-void mostrarTareas(TNodo ** tareasPendientes, TNodo ** tareasRealizadas, int cantTareas);
-
-
+void mostrarTareas(TNodo ** tareasPendientes, TNodo ** tareasRealizadas);
+TNodo BusquedaPorID(TNodo * tareasPendientes, TNodo * tareasRealizadas, int cantTareas);
+TNodo BusquedaPorPalabra(TNodo * tareasPendientes, TNodo * tareasRealizadas, int cantTareas);
+void mostrarBusqueda(TNodo busqueda);
 
 int main(){
     srand(time(NULL));
 
     int cantTareas;
-    TTarea busqueda;
+    TNodo busqueda;
 
     TNodo * tareasPendientes = NULL; //start
     TNodo * tareasRealizadas = NULL; //start
@@ -37,8 +38,13 @@ int main(){
 
     cargarTareas(&tareasPendientes, cantTareas);
     realizarTareas(&tareasPendientes, &tareasRealizadas, cantTareas);
-    mostrarTareas(&tareasPendientes, &tareasRealizadas, cantTareas);
+    mostrarTareas(&tareasPendientes, &tareasRealizadas);
 
+    busqueda = BusquedaPorID(tareasPendientes, tareasRealizadas, cantTareas);
+    mostrarBusqueda(busqueda);
+
+    busqueda = BusquedaPorPalabra(tareasPendientes, tareasRealizadas, cantTareas);
+    mostrarBusqueda(busqueda);
 
     return 0;
 }
@@ -114,7 +120,7 @@ void realizarTareas(TNodo ** tareasPendientes,TNodo ** tareasRealizadas, int can
     }
 }
 
-void mostrarTareas(TNodo ** tareasPendientes, TNodo ** tareasRealizadas, int cantTareas){
+void mostrarTareas(TNodo ** tareasPendientes, TNodo ** tareasRealizadas){
     TNodo * auxPendientes = *tareasPendientes;
     TNodo * auxRealizadas = *tareasRealizadas;
 
@@ -133,6 +139,76 @@ void mostrarTareas(TNodo ** tareasPendientes, TNodo ** tareasRealizadas, int can
 		printf("Descripcion: \"%s\"\n", auxPendientes->T.Descripcion);
 		printf("Duracion: %d\n\n", auxPendientes->T.Duracion);
         auxPendientes = auxPendientes->Siguiente;
+    }
+    system("pause");
+    system("cls");
+}
+
+TNodo BusquedaPorID(TNodo * tareasPendientes, TNodo * tareasRealizadas, int cantTareas){
+    int ID;
+    TNodo * auxPendientes = tareasPendientes;
+    TNodo * auxRealizadas = tareasRealizadas;
+    TNodo aux;
+    aux.T.TareaID = 0;
+
+    printf("ID de la tarea a buscar: ");
+    scanf("%d",&ID);
+    fflush(stdin);
+    system("cls");
+
+    for (int i = 0; i < cantTareas; i++)
+    {
+        if (auxPendientes->T.TareaID == ID)
+        {
+            return *(auxPendientes);
+        }
+        else if(auxRealizadas->T.TareaID == ID)
+        {
+            return *(auxRealizadas);
+        }
+        auxPendientes = auxPendientes->Siguiente;
+        auxRealizadas = auxRealizadas->Siguiente;
+    }
+    return aux;
+}
+
+TNodo BusquedaPorPalabra(TNodo * tareasPendientes, TNodo * tareasRealizadas, int cantTareas){
+    char palabraClave[100];
+    TNodo * auxPendientes = tareasPendientes;
+    TNodo * auxRealizadas = tareasRealizadas;
+    TNodo aux;
+    aux.T.TareaID = 0;
+
+    printf("Palabra clave para buscar: ");
+    gets(palabraClave);
+    fflush(stdin);
+    system("cls");
+
+    for (int i = 0; i < cantTareas; i++)
+    {
+        if (strstr(auxPendientes->T.Descripcion, palabraClave))
+        {
+            return *(auxPendientes);
+        }
+        else if(strstr(auxRealizadas->T.Descripcion, palabraClave))
+        {
+            return *(auxRealizadas);
+        }
+        auxPendientes = auxPendientes->Siguiente;
+        auxRealizadas = auxRealizadas->Siguiente;
+    }
+    return aux;
+}
+
+void mostrarBusqueda(TNodo busqueda){
+    if (busqueda.T.TareaID != 0)
+    {
+        printf("Tarea Numero %d\n\n", busqueda.T.TareaID);
+        printf("Descripcion: \"%s\"\n", busqueda.T.Descripcion);
+        printf("Duracion: %d\n\n", busqueda.T.Duracion);
+    }
+    else{
+        printf("No se encontro esa tarea!\n\n");
     }
     system("pause");
     system("cls");
